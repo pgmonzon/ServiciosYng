@@ -8,5 +8,4 @@ const(
     DB_Name = "yangee"
     DB_User = "yng_Usr"
     DB_Pass = "1962Laser"
-    
 )
