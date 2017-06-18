@@ -7,6 +7,5 @@ const(
     //DB_Host = "mongodb://yng_user:laser@ds021326.mlab.com:21326/yangee"
     DB_Name = "yangee"
     DB_User = "yng_Usr"
-    DB_Pass = "1962Laser"
-    
+    DB_Pass = "1962Laser"   
 )
