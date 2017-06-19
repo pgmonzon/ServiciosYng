@@ -8,4 +8,12 @@ type Usuario struct {
 	ID        bson.ObjectId `bson:"_id" json:"id"`
 	Usuario   string        `json:"usuario"`
   Mail      string        `json:"mail"`
+	Clave			int64 				`json:"clave"`
+}
+
+// para soportar el campo clave como string
+type UsuarioRegisro struct {
+	Usuario   string        `json:"usuario"`
+  Mail      string        `json:"mail"`
+	Clave			string 				`json:"clave"`
 }

@@ -67,23 +67,27 @@ func UsuarioTraer(w http.ResponseWriter, r *http.Request) {
 // Registra un nuevo Usuario
 func UsuarioRegistrar(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
-	var usuario models.Usuario
+	var usuarioRegistro models.UsuarioRegisro
   decoder := json.NewDecoder(r.Body)
-  err := decoder.Decode(&usuario)
+  err := decoder.Decode(&usuarioRegistro)
   if err != nil {
     core.ErrorJSON(w, r, start, "JSON decode erróneo", http.StatusBadRequest)
     return
   }
 
   // hago las validaciones de los campos obligatorios
-	if usuario.Usuario == "" {
+	if usuarioRegistro.Usuario == "" {
 		core.ErrorJSON(w, r, start, "El usuario no puede estar vacío", http.StatusBadRequest)
 		return
 	}
 
-  // establezco los campos que no vienen en el JSON
+  // establezco los campos que voy a guardar
+  var usuario models.Usuario
 	objID := bson.NewObjectId()
 	usuario.ID = objID
+  usuario.Usuario = usuarioRegistro.Usuario
+  usuario.Mail = usuarioRegistro.Mail
+  usuario.Clave = core.HashSha512(usuarioRegistro.Clave)
 
   // Genero una nueva sesión Mongo
 	session := core.GetMongoSession()
