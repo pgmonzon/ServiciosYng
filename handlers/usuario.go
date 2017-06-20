@@ -8,6 +8,7 @@ import (
   "github.com/pgmonzon/ServiciosYng/models"
   "github.com/pgmonzon/ServiciosYng/core"
 
+  "gopkg.in/mgo.v2"
   "gopkg.in/mgo.v2/bson"
   "github.com/gorilla/mux"
 )
@@ -93,13 +94,33 @@ func UsuarioRegistrar(w http.ResponseWriter, r *http.Request) {
 	session := core.GetMongoSession()
   defer session.Close()
 
-  // Intento el alta
+  // Defino la colección
   collection := session.DB("yangee").C("usuario")
+
+  // Me aseguro el índice
+  index := mgo.Index{
+    Key:        []string{"usuario"},
+    Unique:     true,
+    DropDups:   true,
+    Background: true,
+    Sparse:     true,
+  }
+  err = collection.EnsureIndex(index)
+  if err != nil {
+    panic(err)
+  }
+
+  // Intento el alta
 	err = collection.Insert(usuario)
 	if err != nil {
+    if mgo.IsDup(err) {
+      core.ErrorJSON(w, r, start, "El usuario ya existe", http.StatusBadRequest)
+  		return
+    }
 		core.ErrorJSON(w, r, start, "No se registró el usuario", http.StatusInternalServerError)
 		return
 	}
+
 	w.Header().Set("Location", r.URL.Path+"/"+string(usuario.ID.Hex()))
 	core.RespuestaJSON(w, r, start, []byte{}, http.StatusCreated)
 }
