@@ -17,3 +17,8 @@ type UsuarioRegisro struct {
   Mail      string        `json:"mail"`
 	Clave			string 				`json:"clave"`
 }
+
+type UsuarioLogin struct {
+	Usuario		string				`json:"usuario"`
+	Clave			string				`json:"clave"`
+}
