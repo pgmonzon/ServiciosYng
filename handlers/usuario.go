@@ -252,7 +252,8 @@ func UsuarioLogin(w http.ResponseWriter, r *http.Request) {
 	if usuario.ID == "" {
 		core.ErrorJSON(w, r, start, "Acceso denegado", http.StatusNotFound)
 	} else {
-		response, err := json.MarshalIndent(usuario, "", "    ")
+    token := core.CrearToken(usuario)
+		response, err := json.MarshalIndent(token, "", "    ")
 		if err != nil {
 			panic(err)
 		}
