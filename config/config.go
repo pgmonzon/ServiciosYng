@@ -8,4 +8,9 @@ const(
     DB_Name = "yangee"
     DB_User = "yng_Usr"
     DB_Pass = "1962Laser"
+
+    // token y cookies
+    ExpiraToken   = 12 // en cantidad de horas
+    ExpiraCookie  = 12 // en cantidad de horas
+    Secret        = "1962Laser"
 )
