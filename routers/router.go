@@ -42,6 +42,7 @@ func NewRouter() *mux.Router {
   r.HandleFunc("/api/usuarios/{usuarioID}", handlers.UsuarioModificar).Methods("PUT")
   r.HandleFunc("/api/usuarios/{usuarioID}", handlers.UsuarioBorrar).Methods("DELETE")
   r.HandleFunc("/api/usuarios/buscar/porusuario/{usuarioUsuario}", handlers.UsuarioBuscarUsuario).Methods("GET")
+  r.HandleFunc("/api/usuarios/login", handlers.UsuarioLogin).Methods("POST")
 
 	r.NotFoundHandler = http.HandlerFunc(NotFound)
 	return r
