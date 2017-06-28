@@ -17,14 +17,10 @@ func CrearToken(usuario models.Usuario) (interface{}) {
   }
 
   // Creación del token
-  token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+  token := jwt.NewWithClaims(jwt.SigningMethodHS512, claims)
 
   // Firmo el token con secret
   signedToken, _ := token.SignedString([]byte(config.Secret))
-
-  // Pongo el token en una cookie en el cliente
-  //cookie := http.Cookie{Name: "Auth", Value: signedToken, Expires: config.ExpiraCookie, HttpOnly: true}
-  //http.SetCookie(res, &cookie)
 
   // Devuelvo el token
   jsonToken := map[string]string{"token": signedToken}

@@ -9,9 +9,9 @@ import (
 )
 
 func main() {
-	fmt.Printf("Yangee REST API Service\n")
+	fmt.Printf("Yangee REST API Services\n")
 
 	router := routers.NewRouter()
-	
+
 	log.Fatal(http.ListenAndServe(":3113", router))
 }
