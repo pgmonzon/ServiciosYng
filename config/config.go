@@ -1,16 +1,54 @@
 package config
 
-const(
-    // Base de datos
-    DB_Host = "localhost"
-    //DB_Host = "mongodb://127.0.0.1:27017"
-    //DB_Host = "mongodb://yng_user:laser@ds021326.mlab.com:21326/yangee"
-    DB_Name = "yangee"
-    DB_User = "yng_Usr"
-    DB_Pass = "1962Laser"
-
-    // token y cookies
-    ExpiraToken   = 12 // en cantidad de horas
-    ExpiraCookie  = 12 // en cantidad de horas
-    Secret        = "1962Laser"
+import (
+  "encoding/json"
+	"fmt"
+	"io/ioutil"
+	"os"
 )
+
+var environments = map[string]string{
+  "produccion": "C:/Users/Patricio/Google Drive/proyectoYangee/codigoGo/src/github.com/pgmonzon/ServiciosYng/config/prod.json",
+  "desarrollo": "C:/Users/Patricio/Google Drive/proyectoYangee/codigoGo/src/github.com/pgmonzon/ServiciosYng/config/desa.json",
+}
+
+type Settings struct {
+	PrivateKeyPath     string
+	PublicKeyPath      string
+	JWTExpirationDelta int
+}
+
+var settings Settings = Settings{}
+var env = "desarrollo"
+
+func Inicializar() {
+	env = os.Getenv("GO_ENV")
+	if env == "" {
+		fmt.Println("Warning: No se encontró entorno, se seteó desarrollo")
+		env = "desarrollo"
+	}
+	LoadSettingsByEnv(env)
+}
+
+func LoadSettingsByEnv(env string) {
+	content, err := ioutil.ReadFile(environments[env])
+	if err != nil {
+		fmt.Println("Error: No se pudo leer el config", err)
+	}
+	settings = Settings{}
+	jsonErr := json.Unmarshal(content, &settings)
+	if jsonErr != nil {
+		fmt.Println("Error: No se pudo parsear el config", jsonErr)
+	}
+}
+
+func GetEnvironment() string {
+	return env
+}
+
+func Get() Settings {
+	if &settings == nil {
+		Inicializar()
+	}
+	return settings
+}

@@ -1,0 +1,5 @@
+{
+  "PrivateKeyPath": "C:/Users/Patricio/Google Drive/proyectoYangee/codigoGo/src/github.com/pgmonzon/ServiciosYng/config/keys_desa/private_key",
+  "PublicKeyPath": "C:/Users/Patricio/Google Drive/proyectoYangee/codigoGo/src/github.com/pgmonzon/ServiciosYng/config/keys_desa/public_key.pub",
+  "JWTExpirationDelta": 72
+}

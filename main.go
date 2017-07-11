@@ -6,12 +6,14 @@ import (
 	"net/http"
 
 	"github.com/pgmonzon/ServiciosYng/routers"
+	"github.com/pgmonzon/ServiciosYng/config"
 )
 
 func main() {
-	fmt.Printf("Yangee REST API Services\n")
+	fmt.Println("Yangee REST API Services...")
 
-	router := routers.NewRouter()
+	config.Inicializar()
+	router := routers.InicializarRutas()
 
 	log.Fatal(http.ListenAndServe(":3113", router))
 }
