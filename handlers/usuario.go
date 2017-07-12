@@ -4,7 +4,6 @@ import (
   "time"
   "encoding/json"
   "net/http"
-  "fmt"
 
   "github.com/pgmonzon/ServiciosYng/models"
   "github.com/pgmonzon/ServiciosYng/core"
@@ -254,6 +253,7 @@ func UsuarioLogin(w http.ResponseWriter, r *http.Request) {
 		core.ErrorJSON(w, r, start, "Acceso denegado", http.StatusNotFound)
 	} else {
     token := core.CrearToken(usuario)
+    //token := "qazwsxedc"
     response, err := json.Marshal(token)
 		if err != nil {
 			panic(err)
@@ -261,7 +261,7 @@ func UsuarioLogin(w http.ResponseWriter, r *http.Request) {
 		core.RespuestaJSON(w, r, start, response, http.StatusOK)
 	}
 }
-
+/*
 func UsuarioLogout(w http.ResponseWriter, r *http.Request) {
   start := time.Now()
   tokenString := r.Header.Get("Token")
@@ -277,3 +277,4 @@ func UsuarioLogout(w http.ResponseWriter, r *http.Request) {
   //core.RespuestaJSON(w, r, start, response, http.StatusOk)
   core.RespuestaJSON(w, r, start, response, 1)
 }
+*/

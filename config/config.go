@@ -1,54 +1,49 @@
 package config
 
 import (
-  "encoding/json"
-	"fmt"
-	"io/ioutil"
-	"os"
+  "crypto/rsa"
 )
 
-var environments = map[string]string{
-  "produccion": "C:/Users/Patricio/Google Drive/proyectoYangee/codigoGo/src/github.com/pgmonzon/ServiciosYng/config/prod.json",
-  "desarrollo": "C:/Users/Patricio/Google Drive/proyectoYangee/codigoGo/src/github.com/pgmonzon/ServiciosYng/config/desa.json",
-}
+const(
+    // Base de datos
+    DB_Host = "localhost"
+    //DB_Host = "mongodb://127.0.0.1:27017"
+    //DB_Host = "mongodb://yng_user:laser@ds021326.mlab.com:21326/yangee"
+    DB_Name = "yangee"
+    DB_User = "yng_Usr"
+    DB_Pass = "1962Laser"
 
-type Settings struct {
-	PrivateKeyPath     string
-	PublicKeyPath      string
-	JWTExpirationDelta int
-}
+    // jwt
+    PrivKeyPath = "C:/Users/Patricio/Google Drive/proyectoYangee/codigoGo/src/github.com/pgmonzon/ServiciosYng/config/keys_desa/private_key"
+    PubKeyPath = "C:/Users/Patricio/Google Drive/proyectoYangee/codigoGo/src/github.com/pgmonzon/ServiciosYng/config/keys_desa/public_key.pub"
+    ExpiraToken   = 12 // en cantidad de horas
+)
 
-var settings Settings = Settings{}
-var env = "desarrollo"
+var (
+  verifyKey *rsa.PublicKey
+  signKey   *rsa.PrivateKey
+)
 
 func Inicializar() {
-	env = os.Getenv("GO_ENV")
-	if env == "" {
-		fmt.Println("Warning: No se encontró entorno, se seteó desarrollo")
-		env = "desarrollo"
-	}
-	LoadSettingsByEnv(env)
-}
+/*
+  SignBytes, err := ioutil.ReadFile(privKeyPath)
+  if err != nil {
+    log.Fatal(err)
+  }
 
-func LoadSettingsByEnv(env string) {
-	content, err := ioutil.ReadFile(environments[env])
-	if err != nil {
-		fmt.Println("Error: No se pudo leer el config", err)
-	}
-	settings = Settings{}
-	jsonErr := json.Unmarshal(content, &settings)
-	if jsonErr != nil {
-		fmt.Println("Error: No se pudo parsear el config", jsonErr)
-	}
-}
+  SignKey, err := jwt.ParseRSAPublicKeyFromPEM(SignBytes)
+  if err != nil {
+    log.Fatal(err)
+  }
 
-func GetEnvironment() string {
-	return env
-}
+  VerifyBytes, err := ioutil.ReadFile(pubKeyPath)
+  if err != nil {
+    log.Fatal(err)
+  }
 
-func Get() Settings {
-	if &settings == nil {
-		Inicializar()
-	}
-	return settings
+  VerifyKey, err := jwt.ParseRSAPublicKeyFromPEM(VerifyBytes)
+  if err != nil {
+    log.Fatal(err)
+  }
+*/
 }

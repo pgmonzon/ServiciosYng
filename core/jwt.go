@@ -1,8 +1,9 @@
 package core
 
 import (
-  "fmt"
   "time"
+  "io/ioutil"
+  "fmt"
 
   "github.com/pgmonzon/ServiciosYng/models"
   "github.com/pgmonzon/ServiciosYng/config"
@@ -11,60 +12,36 @@ import (
 )
 
 func CrearToken(usuario models.Usuario) (interface{}) {
-  // Asignación de Claims
-  expiraToken := time.Now().Add(config.ExpiraToken * 1).Unix()
-  claims := models.Claims {
-    usuario.ID,
-    jwt.StandardClaims {
-      ExpiresAt: expiraToken,
-    },
-  }
-
   // Creación del token
-  token := jwt.NewWithClaims(jwt.SigningMethodHS512, claims)
+  token := jwt.New(jwt.SigningMethodHS256)
 
-  // Firmo el token con Secret
-  signedToken, _ := token.SignedString([]byte(config.Secret))
+  // Asignación de Claims
+  claims := make(jwt.MapClaims)
+  claims["exp"] = time.Now().Add(time.Hour * time.Duration(config.ExpiraToken)).Unix()
+	claims["iat"] = time.Now().Unix()
+	claims["sub"] = usuario.ID
+  token.Claims = claims
+
+  // Firmo el token
+  signBytes, err := ioutil.ReadFile(config.PrivKeyPath)
+  if err != nil {
+    fmt.Println("Firma token paso 1")
+  }
+  FatalErr(err)
+
+  signKey, err := jwt.ParseRSAPublicKeyFromPEM(signBytes)
+  if err != nil {
+    fmt.Println("Firma token paso 2")
+  }
+  FatalErr(err)
+
+  tokenString, err := token.SignedString(signKey)
+  if err != nil {
+    fmt.Println("Firma token paso 3")
+  }
+  FatalErr(err)
 
   // Devuelvo el token
-  jsonToken := map[string]string{"token": signedToken}
+  jsonToken := map[string]string{"token": tokenString}
   return jsonToken
-}
-
-func ValidarToken(tokenString string) (interface{}) {
-  fmt.Println(tokenString)
-  token, err := jwt.ParseWithClaims(tokenString, &models.Claims{}, func(token *jwt.Token) (interface{}, error) {
-		// since we only use the one private key to sign the tokens,
-		// we also only use its public counter part to verify
-		return config.Secret, nil
-	})
-
-  if err != nil {
-    return "qwerty"
-  }
-
-	claims := token.Claims.(*models.Claims)
-	fmt.Println(claims.ID)
-  return claims.ID
-
-/*
-  token, err := jwt.ParseWithClaims(tokenString, &models.Claims{}, func(token *jwt.Token) (interface{}, error) {
-    if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-      return nil, fmt.Errorf("Método de firma inesperado")
-    } else {
-      return config.Secret, nil
-    }
-
-    if claims, ok := token.Claims.(*models.Claims); ok && token.Valid {
-      return claims.ID, nil
-    } else {
-      return "asd", nil
-    }
-  })
-
-  if err != nil {
-    return "qwe"
-  }
-  return token
-*/
 }
