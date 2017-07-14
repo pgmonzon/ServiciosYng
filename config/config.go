@@ -1,5 +1,13 @@
 package config
 
+import (
+  "io/ioutil"
+  "log"
+
+  "crypto/rsa"
+  "github.com/dgrijalva/jwt-go"
+)
+
 const(
     // Base de datos
     DB_Host = "localhost"
@@ -9,8 +17,33 @@ const(
     DB_User = "yng_Usr"
     DB_Pass = "1962Laser"
 
-    // token y cookies
-    ExpiraToken   = 12 // en cantidad de horas
-    ExpiraCookie  = 12 // en cantidad de horas
-    Secret        = "1962Laser"
+    // jwt
+    privKeyPath = "C:/Users/Patricio/Google Drive/proyectoYangee/codigoGo/src/github.com/pgmonzon/ServiciosYng/config/keys/app.rsa"
+    pubKeyPath = "C:/Users/Patricio/Google Drive/proyectoYangee/codigoGo/src/github.com/pgmonzon/ServiciosYng/config/keys/app.rsa.pub"
+    ExpiraToken   = 720 // en minutos
 )
+
+var (
+	VerifyKey *rsa.PublicKey
+	SignKey   *rsa.PrivateKey
+)
+
+func fatal(err error) {
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func Inicializar() {
+  signBytes, err := ioutil.ReadFile(privKeyPath)
+	fatal(err)
+
+	SignKey, err = jwt.ParseRSAPrivateKeyFromPEM(signBytes)
+	fatal(err)
+
+	verifyBytes, err := ioutil.ReadFile(pubKeyPath)
+	fatal(err)
+
+	VerifyKey, err = jwt.ParseRSAPublicKeyFromPEM(verifyBytes)
+	fatal(err)
+}

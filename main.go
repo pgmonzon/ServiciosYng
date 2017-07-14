@@ -2,16 +2,14 @@ package main
 
 import (
 	"fmt"
-	"log"
-	"net/http"
 
 	"github.com/pgmonzon/ServiciosYng/routers"
+	"github.com/pgmonzon/ServiciosYng/config"
 )
 
 func main() {
-	fmt.Printf("Yangee REST API Service\n")
+	fmt.Println("Yangee REST API Services...")
 
-	router := routers.NewRouter()
-	
-	log.Fatal(http.ListenAndServe(":3113", router))
+	config.Inicializar()
+	routers.InicializarRutas()
 }
