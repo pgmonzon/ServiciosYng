@@ -1,14 +1,19 @@
 package routers
 
 import (
-  "github.com/pgmonzon/ServiciosYng/handlers"
+  "net/http"
 
-  "github.com/gorilla/mux"
+  "github.com/pgmonzon/ServiciosYng/handlers"
+  "github.com/pgmonzon/ServiciosYng/core"
+
+  "github.com/codegangsta/negroni"
 )
 
-func SetRutasUsuario(router *mux.Router) *mux.Router {
-  router.HandleFunc("/login", handlers.UsuarioLogin).Methods("POST")
-  //router.HandleFunc("/api/usuarios/logout", handlers.UsuarioLogout).Methods("GET")
-  //tokenString := req.Header.Get("Authorization")
-	return router
+func SetRutasUsuario() {
+  http.HandleFunc("/login", handlers.UsuarioLogin)
+
+  http.Handle("/usuarios", negroni.New(
+    negroni.HandlerFunc(core.ValidarToken),
+    negroni.Wrap(http.HandlerFunc(handlers.UsuarioListar)),
+    ))
 }

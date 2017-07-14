@@ -11,6 +11,7 @@ import (
   "gopkg.in/mgo.v2/bson"
 )
 
+// Valida las credenciales del usuario
 func UsuarioLogin(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
   var usuarioLogin models.UsuarioLogin
@@ -26,11 +27,11 @@ func UsuarioLogin(w http.ResponseWriter, r *http.Request) {
 
   // hago las validaciones de los campos obligatorios
 	if usuarioLogin.Usuario == "" {
-		core.ErrorJSON(w, r, start, "El usuario no puede estar vacío", http.StatusBadRequest)
+		core.ErrorJSON(w, r, start, "El usuario no puede estar vacío", http.StatusUnauthorized )
 		return
 	}
   if usuarioLogin.Clave == "" {
-		core.ErrorJSON(w, r, start, "La clave no puede estar vacía", http.StatusBadRequest)
+		core.ErrorJSON(w, r, start, "La clave no puede estar vacía", http.StatusUnauthorized)
 		return
 	}
 
@@ -42,7 +43,7 @@ func UsuarioLogin(w http.ResponseWriter, r *http.Request) {
 	collection := session.DB("yangee").C("usuario")
 	collection.Find(bson.M{"usuario": usuarioLogin.Usuario, "clave": core.HashSha512(usuarioLogin.Clave)}).One(&usuario)
 	if usuario.ID == "" {
-		core.ErrorJSON(w, r, start, "Acceso denegado", http.StatusNotFound)
+		core.ErrorJSON(w, r, start, "Acceso denegado", http.StatusUnauthorized)
 	} else {
     token, err := core.CrearToken(usuario)
     if err != nil {
@@ -52,4 +53,21 @@ func UsuarioLogin(w http.ResponseWriter, r *http.Request) {
 		core.FatalErr(err)
 		core.RespuestaJSON(w, r, start, response, http.StatusOK)
 	}
+}
+
+// Lista todos los usuarios
+func UsuarioListar(w http.ResponseWriter, r *http.Request) {
+  start := time.Now()
+	var usuarios []models.Usuario
+
+  // Genero una nueva sesión Mongo
+	session := core.GetMongoSession()
+	defer session.Close()
+
+  // Intento traer todos
+	collection := session.DB("yangee").C("usuario")
+	collection.Find(bson.M{}).All(&usuarios)
+	response, err := json.Marshal(usuarios)
+	core.FatalErr(err)
+	core.RespuestaJSON(w, r, start, response, http.StatusOK)
 }

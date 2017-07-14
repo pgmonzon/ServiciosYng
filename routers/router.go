@@ -1,11 +1,11 @@
 package routers
 
 import (
-	"github.com/gorilla/mux"
+	"net/http"
 )
 
-func InicializarRutas() *mux.Router {
-	router := mux.NewRouter()
-	router = SetRutasUsuario(router)
-	return router
+func InicializarRutas() {
+	SetRutasUsuario()
+
+	http.ListenAndServe(":3113", nil)
 }

@@ -20,11 +20,11 @@ const(
     // jwt
     privKeyPath = "C:/Users/Patricio/Google Drive/proyectoYangee/codigoGo/src/github.com/pgmonzon/ServiciosYng/config/keys/app.rsa"
     pubKeyPath = "C:/Users/Patricio/Google Drive/proyectoYangee/codigoGo/src/github.com/pgmonzon/ServiciosYng/config/keys/app.rsa.pub"
-    ExpiraToken   = 10 // en minutos
+    ExpiraToken   = 720 // en minutos
 )
 
 var (
-	verifyKey *rsa.PublicKey
+	VerifyKey *rsa.PublicKey
 	SignKey   *rsa.PrivateKey
 )
 
@@ -44,6 +44,6 @@ func Inicializar() {
 	verifyBytes, err := ioutil.ReadFile(pubKeyPath)
 	fatal(err)
 
-	verifyKey, err = jwt.ParseRSAPublicKeyFromPEM(verifyBytes)
+	VerifyKey, err = jwt.ParseRSAPublicKeyFromPEM(verifyBytes)
 	fatal(err)
 }
