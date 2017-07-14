@@ -27,7 +27,7 @@ func RespuestaJSON(w http.ResponseWriter, r *http.Request, start time.Time, resp
 
 // Respuesta de error en formato JSON
 func ErrorJSON(w http.ResponseWriter, r *http.Request, start time.Time, message string, code int) {
-	j := map[string]string{"message": message}
+	j := map[string]string{"mensaje": message}
 	response, err := json.Marshal(j)
 	if err != nil {
 		panic(err)
