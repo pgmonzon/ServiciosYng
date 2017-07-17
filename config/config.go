@@ -6,6 +6,7 @@ import (
 
   "crypto/rsa"
   "github.com/dgrijalva/jwt-go"
+  "gopkg.in/mgo.v2/bson"
 )
 
 const(
@@ -24,8 +25,9 @@ const(
 )
 
 var (
-	VerifyKey *rsa.PublicKey
-	SignKey   *rsa.PrivateKey
+	VerifyKey       *rsa.PublicKey
+	SignKey         *rsa.PrivateKey
+  UsuarioActivoID bson.ObjectId
 )
 
 func fatal(err error) {

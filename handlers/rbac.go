@@ -4,10 +4,10 @@ import (
   "time"
   "encoding/json"
   "net/http"
-  "fmt"
 
   "github.com/pgmonzon/ServiciosYng/models"
   "github.com/pgmonzon/ServiciosYng/core"
+  "github.com/pgmonzon/ServiciosYng/config"
 
   "gopkg.in/mgo.v2"
   "gopkg.in/mgo.v2/bson"
@@ -43,7 +43,7 @@ func RolAgregar(w http.ResponseWriter, r *http.Request) {
   rolAdt.RolID_adt = rol.ID
   rolAdt.Estado = rol.Estado
   rolAdt.Borrado = rol.Borrado
-  rolAdt.UsuarioID_adt = objID_adt
+  rolAdt.UsuarioID_adt = config.UsuarioActivoID
   rolAdt.Oper_adt = "RolAgregar"
 
   // Genero una nueva sesión Mongo
