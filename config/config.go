@@ -17,6 +17,7 @@ const(
     DB_Name = "yangee"
     DB_User = "yng_Usr"
     DB_Pass = "1962Laser"
+    DB_Transaction = "transaction"
 
     // jwt
     privKeyPath = "C:/Users/Patricio/Google Drive/proyectoYangee/codigoGo/src/github.com/pgmonzon/ServiciosYng/config/keys/app.rsa"

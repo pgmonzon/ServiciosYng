@@ -4,6 +4,8 @@ import (
   "time"
   "encoding/json"
   "net/http"
+  "fmt"
+  "errors"
 
   "github.com/pgmonzon/ServiciosYng/models"
   "github.com/pgmonzon/ServiciosYng/core"
@@ -11,7 +13,13 @@ import (
 
   "gopkg.in/mgo.v2"
   "gopkg.in/mgo.v2/bson"
+  "gopkg.in/mgo.v2/txn"
 )
+
+func validar() error {
+  err := errors.New("es duplicado")
+  return err
+}
 
 func RolAgregar(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
@@ -50,11 +58,8 @@ func RolAgregar(w http.ResponseWriter, r *http.Request) {
 	session := core.GetMongoSession()
   defer session.Close()
 
-  // Defino la colección y la auditoría
-  col := session.DB("yangee").C("rol")
-  colAdt := session.DB("yangee").C("rolAdt")
-
   // Me aseguro el índice
+  col := session.DB("yangee").C("rol")
   index := mgo.Index{
     Key:        []string{"rol"},
     Unique:     true,
@@ -67,6 +72,29 @@ func RolAgregar(w http.ResponseWriter, r *http.Request) {
     panic(err)
   }
 
+  runner := txn.NewRunner(session.DB(config.DB_Name).C(config.DB_Transaction))
+  ops := []txn.Op{{
+    C: "rol",
+    Id: rol.ID,
+    Assert: validar(),
+    Insert: rol,
+    }, {
+      C: "rolAdt",
+      Id: rolAdt.ID,
+      Insert: rolAdt,
+    }}
+
+  err = runner.Run(ops, rol.ID, nil)
+  if err != nil {
+    fmt.Println(err.Error())
+    if err.Error() == "Insert can only Assert txn.DocMissing%!(EXTRA *errors.errorString=es duplicado)" {
+      core.ErrorJSON(w, r, start, "es duplicado", http.StatusBadRequest)
+    } else {
+      core.ErrorJSON(w, r, start, "error en la transacción", http.StatusBadRequest)
+    }
+    return
+  }
+/*
   // Intento el alta
 	err = col.Insert(rol)
 	if err != nil {
@@ -83,7 +111,7 @@ func RolAgregar(w http.ResponseWriter, r *http.Request) {
 		core.ErrorJSON(w, r, start, "No se registró la auditoría del rol", http.StatusInternalServerError)
 		return
 	}
-
+*/
   response, err := json.Marshal(models.RolID{rol.ID})
   core.FatalErr(err)
   core.RespuestaJSON(w, r, start, response, http.StatusCreated)
