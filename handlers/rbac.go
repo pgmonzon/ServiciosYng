@@ -4,8 +4,8 @@ import (
   "time"
   "encoding/json"
   "net/http"
-  "fmt"
   "errors"
+  "fmt"
 
   "github.com/pgmonzon/ServiciosYng/models"
   "github.com/pgmonzon/ServiciosYng/core"
@@ -16,9 +16,26 @@ import (
   "gopkg.in/mgo.v2/txn"
 )
 
-func validar() error {
-  err := errors.New("es duplicado")
-  return err
+func validarNoExiste(rolAlta string) error {
+  var rol models.Rol
+  var errVal error
+  // Genero una nueva sesión Mongo
+	session := core.GetMongoSession()
+  defer session.Close()
+
+  // Me fijo si el rol ya existe
+	collection := session.DB("yangee").C("rol")
+	err := collection.Find(bson.M{"rol": bson.M{"$regex": rolAlta}}).One(&rol)
+	if err != nil {
+    if err.Error() == "not found" {
+      return errVal
+    } else {
+      errVal = errors.New("Falló la validación del rol")
+      return errVal
+    }
+  }
+  errVal = errors.New("es duplicado")
+  return errVal
 }
 
 func RolAgregar(w http.ResponseWriter, r *http.Request) {
@@ -76,7 +93,7 @@ func RolAgregar(w http.ResponseWriter, r *http.Request) {
   ops := []txn.Op{{
     C: "rol",
     Id: rol.ID,
-    Assert: validar(),
+    Assert: validarNoExiste(rolAlta.Rol),
     Insert: rol,
     }, {
       C: "rolAdt",
@@ -86,32 +103,16 @@ func RolAgregar(w http.ResponseWriter, r *http.Request) {
 
   err = runner.Run(ops, rol.ID, nil)
   if err != nil {
-    fmt.Println(err.Error())
     if err.Error() == "Insert can only Assert txn.DocMissing%!(EXTRA *errors.errorString=es duplicado)" {
       core.ErrorJSON(w, r, start, "es duplicado", http.StatusBadRequest)
     } else {
+      fmt.Println(err.Error())
+
       core.ErrorJSON(w, r, start, "error en la transacción", http.StatusBadRequest)
     }
     return
   }
-/*
-  // Intento el alta
-	err = col.Insert(rol)
-	if err != nil {
-    if mgo.IsDup(err) {
-      core.ErrorJSON(w, r, start, "El rol ya existe", http.StatusBadRequest)
-  		return
-    }
-		core.ErrorJSON(w, r, start, "No se registró el rol", http.StatusInternalServerError)
-		return
-	}
 
-  err = colAdt.Insert(rolAdt)
-	if err != nil {
-		core.ErrorJSON(w, r, start, "No se registró la auditoría del rol", http.StatusInternalServerError)
-		return
-	}
-*/
   response, err := json.Marshal(models.RolID{rol.ID})
   core.FatalErr(err)
   core.RespuestaJSON(w, r, start, response, http.StatusCreated)
