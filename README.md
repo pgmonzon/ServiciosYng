@@ -1,9 +1,6 @@
 Arrancar base de datos Mongo:
-# C:\Program Files\MongoDB\Server\3.4\bin
 
-Listar usuarios:
-
-		# curl -i http://localhost:3113/api/usuarios
+		# C:\Program Files\MongoDB\Server\3.4\bin\mng.bat
 
 Mostrar un solo usuario (reemplazr {id} por bson.ObjectIdHex):
 
