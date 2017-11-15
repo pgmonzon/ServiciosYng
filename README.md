@@ -20,3 +20,6 @@ Correr proyecto:
 
 		C:>cd C:\Users\Patricio\Google Drive\proyectoYangee\codigoGo\bin
 		C:\Users\Patricio\Google Drive\proyectoYangee\codigoGo\bin>ServiciosYng
+		
+Testing: Postman
+
