@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	fmt.Println("Yangee REST API Services...")
+	fmt.Println("Yangee REST API Micro Services v1.0...")
 
 	config.Inicializar()
 	routers.InicializarRutas()

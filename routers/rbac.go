@@ -14,4 +14,8 @@ func SetRutasRBAC() {
     negroni.HandlerFunc(core.ValidarToken),
     negroni.Wrap(http.HandlerFunc(handlers.RolAgregar)),
     ))
+  http.Handle("/recurso", negroni.New(
+    negroni.HandlerFunc(core.ValidarToken),
+    negroni.Wrap(http.HandlerFunc(handlers.RecursoAgregar)),
+    ))
 }

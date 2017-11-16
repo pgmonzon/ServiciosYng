@@ -5,7 +5,6 @@ import (
   "encoding/json"
   "net/http"
   "errors"
-  "fmt"
 
   "github.com/pgmonzon/ServiciosYng/models"
   "github.com/pgmonzon/ServiciosYng/core"
@@ -16,7 +15,7 @@ import (
   "gopkg.in/mgo.v2/txn"
 )
 
-func validarNoExiste(rolAlta string) error {
+func noExisteRol(rolAlta string) error {
   var rol models.Rol
   var errVal error
   // Genero una nueva sesión Mongo
@@ -31,6 +30,28 @@ func validarNoExiste(rolAlta string) error {
       return errVal
     } else {
       errVal = errors.New("Falló la validación del rol")
+      return errVal
+    }
+  }
+  errVal = errors.New("es duplicado")
+  return errVal
+}
+
+func noExisteRecurso(recursoAlta string) error {
+  var recurso models.Recurso
+  var errVal error
+  // Genero una nueva sesión Mongo
+	session := core.GetMongoSession()
+  defer session.Close()
+
+  // Me fijo si el rol ya existe
+	collection := session.DB("yangee").C("recurso")
+	err := collection.Find(bson.M{"recurso": bson.M{"$regex": recursoAlta}}).One(&recurso)
+	if err != nil {
+    if err.Error() == "not found" {
+      return errVal
+    } else {
+      errVal = errors.New("Falló la validación del recurso")
       return errVal
     }
   }
@@ -62,12 +83,15 @@ func RolAgregar(w http.ResponseWriter, r *http.Request) {
   rol.Rol = rolAlta.Rol
   rol.Estado = rolAlta.Estado
   rol.Borrado = false
+  rol.RecursosID = rolAlta.RecursosID
   // auditoría
   objID_adt := bson.NewObjectId()
   rolAdt.ID = objID_adt
   rolAdt.RolID_adt = rol.ID
+  rolAdt.Rol = rol.Rol
   rolAdt.Estado = rol.Estado
   rolAdt.Borrado = rol.Borrado
+  rolAdt.RecursosID = rol.RecursosID
   rolAdt.UsuarioID_adt = config.UsuarioActivoID
   rolAdt.Oper_adt = "RolAgregar"
 
@@ -93,7 +117,7 @@ func RolAgregar(w http.ResponseWriter, r *http.Request) {
   ops := []txn.Op{{
     C: "rol",
     Id: rol.ID,
-    Assert: validarNoExiste(rolAlta.Rol),
+    Assert: noExisteRol(rolAlta.Rol),
     Insert: rol,
     }, {
       C: "rolAdt",
@@ -106,14 +130,91 @@ func RolAgregar(w http.ResponseWriter, r *http.Request) {
     if err.Error() == "Insert can only Assert txn.DocMissing%!(EXTRA *errors.errorString=es duplicado)" {
       core.ErrorJSON(w, r, start, "es duplicado", http.StatusBadRequest)
     } else {
-      fmt.Println(err.Error())
-
       core.ErrorJSON(w, r, start, "error en la transacción", http.StatusBadRequest)
     }
     return
   }
 
   response, err := json.Marshal(models.RolID{rol.ID})
+  core.FatalErr(err)
+  core.RespuestaJSON(w, r, start, response, http.StatusCreated)
+}
+
+func RecursoAgregar(w http.ResponseWriter, r *http.Request) {
+	start := time.Now()
+	var recursoAlta models.RecursoAlta
+  decoder := json.NewDecoder(r.Body)
+  err := decoder.Decode(&recursoAlta)
+  if err != nil {
+    core.ErrorJSON(w, r, start, "JSON decode erróneo", http.StatusBadRequest)
+    return
+  }
+
+  // hago las validaciones de los campos obligatorios
+	if recursoAlta.Recurso == "" {
+		core.ErrorJSON(w, r, start, "El recurso no puede estar vacío", http.StatusBadRequest)
+		return
+	}
+
+  // establezco los campos que voy a guardar
+  var recurso models.Recurso
+  var recursoAdt models.Recurso_adt
+	objID := bson.NewObjectId()
+	recurso.ID = objID
+  recurso.Recurso = recursoAlta.Recurso
+  recurso.Estado = recursoAlta.Estado
+  recurso.Borrado = false
+  // auditoría
+  objID_adt := bson.NewObjectId()
+  recursoAdt.ID = objID_adt
+  recursoAdt.RecursoID_adt = recurso.ID
+  recursoAdt.Recurso = recurso.Recurso
+  recursoAdt.Estado = recurso.Estado
+  recursoAdt.Borrado = recurso.Borrado
+  recursoAdt.UsuarioID_adt = config.UsuarioActivoID
+  recursoAdt.Oper_adt = "RecursoAgregar"
+
+  // Genero una nueva sesión Mongo
+	session := core.GetMongoSession()
+  defer session.Close()
+
+  // Me aseguro el índice
+  col := session.DB("yangee").C("recurso")
+  index := mgo.Index{
+    Key:        []string{"recurso"},
+    Unique:     true,
+    DropDups:   true,
+    Background: true,
+    Sparse:     true,
+  }
+  err = col.EnsureIndex(index)
+  if err != nil {
+    panic(err)
+  }
+
+  runner := txn.NewRunner(session.DB(config.DB_Name).C(config.DB_Transaction))
+  ops := []txn.Op{{
+    C: "recurso",
+    Id: recurso.ID,
+    Assert: noExisteRecurso(recursoAlta.Recurso),
+    Insert: recurso,
+    }, {
+      C: "recursoAdt",
+      Id: recursoAdt.ID,
+      Insert: recursoAdt,
+    }}
+
+  err = runner.Run(ops, recurso.ID, nil)
+  if err != nil {
+    if err.Error() == "Insert can only Assert txn.DocMissing%!(EXTRA *errors.errorString=es duplicado)" {
+      core.ErrorJSON(w, r, start, "es duplicado", http.StatusBadRequest)
+    } else {
+      core.ErrorJSON(w, r, start, "error en la transacción", http.StatusBadRequest)
+    }
+    return
+  }
+
+  response, err := json.Marshal(models.RecursoID{recurso.ID})
   core.FatalErr(err)
   core.RespuestaJSON(w, r, start, response, http.StatusCreated)
 }

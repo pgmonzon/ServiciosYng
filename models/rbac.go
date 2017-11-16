@@ -7,10 +7,11 @@ import (
 )
 
 type Rol struct {
-	ID        bson.ObjectId `bson:"_id" json:"id"`
-	Rol       string        `json:"rol"`
-  Estado    bool          `json:"estado"`
-	Borrado		bool   				`json:"borrado"`
+	ID          bson.ObjectId   `bson:"_id" json:"id"`
+	Rol         string          `json:"rol"`
+  Estado      bool            `json:"estado"`
+	Borrado		  bool   				  `json:"borrado"`
+  RecursosID  []bson.ObjectId `json:"recursos"`
 }
 
 type RolID struct {
@@ -18,8 +19,38 @@ type RolID struct {
 }
 
 type Rol_adt struct {
+  ID            bson.ObjectId   `bson:"_id" json:"id"`
+  RolID_adt     bson.ObjectId	  `json:"rolID_adt"`
+  Rol           string          `json:"rol"`
+  Estado        bool            `json:"estado"`
+	Borrado		    bool   				  `json:"borrado"`
+  RecursosID    []bson.ObjectId `json:"recursos"`
+  Fecha_adt     time.Time       `json:"fecha_adt"`
+  UsuarioID_adt bson.ObjectId	  `json:"usuarioID_adt"`
+  Oper_adt      string          `json: "oper_adt"`
+}
+
+type RolAlta struct {
+	Rol         string          `json:"rol"`
+  Estado      bool            `json:"estado"`
+  RecursosID  []bson.ObjectId `json:"recursos"`
+}
+
+type Recurso struct {
+	ID        bson.ObjectId `bson:"_id" json:"id"`
+	Recurso   string        `json:"rol"`
+  Estado    bool          `json:"estado"`
+	Borrado		bool   				`json:"borrado"`
+}
+
+type RecursoID struct {
+  ID        bson.ObjectId `json:"id"`
+}
+
+type Recurso_adt struct {
   ID            bson.ObjectId `bson:"_id" json:"id"`
-  RolID_adt     bson.ObjectId	`json:"rolID_adt"`
+  RecursoID_adt bson.ObjectId	`json:"recursoID_adt"`
+  Recurso       string        `json:"recurso"`
   Estado        bool          `json:"estado"`
 	Borrado		    bool   				`json:"borrado"`
   Fecha_adt     time.Time     `json:"fecha_adt"`
@@ -27,7 +58,7 @@ type Rol_adt struct {
   Oper_adt      string        `json: "oper_adt"`
 }
 
-type RolAlta struct {
-	Rol       string        `json:"rol"`
+type RecursoAlta struct {
+	Recurso   string        `json:"recurso"`
   Estado    bool          `json:"estado"`
 }

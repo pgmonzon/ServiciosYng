@@ -11,6 +11,7 @@ import (
 
 func SetRutasUsuario() {
   http.HandleFunc("/login", handlers.UsuarioLogin)
+  http.HandleFunc("/usuario", handlers.UsuarioAgregar)
 
   http.Handle("/usuarios", negroni.New(
     negroni.HandlerFunc(core.ValidarToken),
